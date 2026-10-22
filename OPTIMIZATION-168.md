@@ -119,6 +119,21 @@ chunk-sized) and choosing the shared-expert owner by lowest local routed load
 (identical wall time; gate waits are dominated by the slowest routed-expert
 count, not the one shared expert).
 
+## TP shared-memory startup race (2026-10-22)
+
+Workers attached the CUDA TP slab as soon as `shm_open` found the leader's
+name. The leader creates that name before calling `ftruncate`, so a worker
+could map an incompletely sized object; `cudaHostRegister` then failed and
+the worker silently fell back to pinned staging. In practice all three
+workers took the fallback on a normal concurrent start.
+
+Wait for `fstat(fd).st_size` to reach the negotiated slab size before mapping.
+With workers delayed past the leader's `ftruncate`, ranks 1-3 report the
+shared-memory gate data plane active and short-prompt decode rises from
+16.3-16.5 to 16.9-17.1 t/s. The remaining TP profile is 80 gates/token with
+about 4.0-4.6 ms GPU sync and 13-31 ms exchange; exchange is dominated by the
+slowest rank's routed-expert work, not by the data plane itself.
+
 ## Multi-rank TP (4/8 GPUs)
 
 V4.1 Flash now supports expert-parallel TP on 4 or 8 GPUs. See

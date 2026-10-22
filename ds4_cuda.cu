@@ -35857,10 +35857,23 @@ extern "C" ds4_gpu_tensor *ds4_gpu_tp_shm_slab_alloc(const char *name,
         }
     } else {
         /* The leader creates the object only after the TP handshake, so a
-         * worker can arrive a little early while the model is still loading. */
+         * worker can arrive a little early while the model is still loading.
+         * shm_open succeeds as soon as the name exists, which is before the
+         * leader has sized it with ftruncate. Mapping and registering those
+         * zero-length pages makes cudaHostRegister fail, silently downgrading
+         * every worker to pinned staging. Wait for the finalized size. */
         for (int i = 0; i < 900 && fd < 0; i++) {
-            fd = shm_open(name, O_RDWR, 0600);
-            if (fd < 0) usleep(100000);
+            const int probe = shm_open(name, O_RDWR, 0600);
+            if (probe >= 0) {
+                struct stat st;
+                if (fstat(probe, &st) == 0 &&
+                    st.st_size >= 0 && (uint64_t)st.st_size >= total) {
+                    fd = probe;
+                    break;
+                }
+                (void)close(probe);
+            }
+            usleep(100000);
         }
     }
     if (fd < 0) return NULL;
