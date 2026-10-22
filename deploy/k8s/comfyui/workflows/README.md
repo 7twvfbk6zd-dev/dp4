@@ -13,6 +13,7 @@ normal ComfyUI output directory.
 | `render_comic_page.py` | Adds captions, bubbles, and page layout | `comic-page.png` |
 | `generate_voiceover.ps1` | Windows Chinese TTS for captions and dialogue | `*.wav` |
 | `build_voice_timeline.py` | Builds SRT, timing JSON, and combined audio | `timeline.json` |
+| `build_motion_comic.py` | Adds camera motion, subtitles, and audio | `motion-comic.mp4` |
 
 ## Prerequisites
 
@@ -145,6 +146,28 @@ python3 deploy/k8s/comfyui/workflows/build_voice_timeline.py \
 The voice script uses rate `-2` for dialogue and rate `0` for narration. The
 timeline adds a 0.4 second lead-in and 0.35 second gaps, which are also used by
 the motion-comic renderer.
+
+## Motion comic
+
+The final renderer uses ffmpeg inside the ComfyUI container. Copy the script,
+storyboard, audio timeline, combined WAV, and a CJK font to the persistent
+volume, then run:
+
+```bash
+kubectl -n comfyui exec deploy/comfyui -- python3 \
+  /workspace/ComfyUI/output/storyboard_demo_v3/build_motion_comic.py \
+  --storyboard /workspace/ComfyUI/output/storyboard_demo_v3/storyboard.example.json \
+  --timeline /workspace/ComfyUI/output/storyboard_demo_v3/audio/timeline.json \
+  --images-dir /workspace/ComfyUI/output/storyboard_demo_v3 \
+  --audio /workspace/ComfyUI/output/storyboard_demo_v3/audio/voiceover.wav \
+  --font /workspace/assets/fonts/msyh.ttc \
+  --output /workspace/ComfyUI/output/storyboard_demo_v3/motion-comic.mp4
+```
+
+The output is vertical 1080x1920 at 25 fps. Panels alternate between slow zoom
+and horizontal pan, subtitles are rendered with libass, and the voice track is
+mixed with generated rain ambience. The current cut is 19.76 seconds and is
+suitable for mobile short-video delivery.
 
 ## Output and polling
 

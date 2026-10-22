@@ -34,12 +34,14 @@ Status: done.
 
 ## 4. Motion comic
 
-Status: pending.
+Status: done.
 
 - Animate still panels with slow zoom and pan.
 - Add rain ambience and panel transitions.
 - Burn in subtitles and mix the voice track.
 - Target: 20-30 second 1080p H.264/AAC teaser.
+- Output: 19.76 second vertical 1080x1920 H.264/AAC video with burned-in
+  subtitles and mixed rain ambience.
 
 ## 5. Image-to-video
 
