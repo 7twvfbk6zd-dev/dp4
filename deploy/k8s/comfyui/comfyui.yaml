@@ -58,6 +58,7 @@ spec:
         app: comfyui
     spec:
       runtimeClassName: nvidia
+      enableServiceLinks: false
       nodeSelector:
         kubernetes.io/hostname: xszn-server
       terminationGracePeriodSeconds: 30
@@ -86,11 +87,22 @@ spec:
             secretKeyRef:
               name: comfyui-auth
               key: password
+        - name: WEB_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: comfyui-auth
+              key: token
         - name: HF_HOME
           value: /workspace/.cache/huggingface
+        - name: COMFYUI_PORT
+          value: |-
+            8188
         - name: COMFYUI_PORT_HOST
           value: |-
             8188
+        - name: CF_QUICK_TUNNELS
+          value: |-
+            false
         ports:
         - name: http
           containerPort: 8188
@@ -110,14 +122,14 @@ spec:
           mountPath: /dev/shm
         readinessProbe:
           httpGet:
-            path: /
+            path: /ai-dock/health-check
             port: http
           initialDelaySeconds: 30
           periodSeconds: 10
           failureThreshold: 30
         livenessProbe:
           httpGet:
-            path: /
+            path: /ai-dock/health-check
             port: http
           initialDelaySeconds: 180
           periodSeconds: 30

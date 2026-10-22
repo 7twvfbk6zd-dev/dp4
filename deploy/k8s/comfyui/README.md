@@ -11,11 +11,12 @@ The host data directory must exist before the PV is mounted:
 mkdir -p /mapdata1/comfyui
 ```
 
-Create the UI password secret once:
+Create the UI secret once. The token is the stable login token used in the URL:
 
 ```bash
 kubectl -n comfyui create secret generic comfyui-auth \
-  --from-literal=password='<change-me>'
+  --from-literal=password='<change-me>' \
+  --from-literal=token='<change-me-too>'
 ```
 
 ## Deploy
@@ -25,7 +26,15 @@ kubectl apply -f deploy/k8s/comfyui/comfyui.yaml
 kubectl -n comfyui rollout status deploy/comfyui
 ```
 
-Open `http://172.16.0.168:30188/` and log in as `admin`.
+Read the token and open the UI:
+
+```bash
+TOKEN=$(kubectl -n comfyui get secret comfyui-auth \
+  -o jsonpath='{.data.token}' | base64 -d)
+echo http://172.16.0.168:30188/?token=$TOKEN
+```
+
+The browser stores the token as a cookie after the first visit.
 
 The pod requests `nvidia.com/gpu: 1`. Do not change it to four GPUs: native
 ComfyUI runs one workflow on one GPU. Scale with additional replicas and
