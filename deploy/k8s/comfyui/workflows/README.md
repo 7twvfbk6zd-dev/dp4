@@ -15,6 +15,7 @@ normal ComfyUI output directory.
 | `build_voice_timeline.py` | Builds SRT, timing JSON, and combined audio | `timeline.json` |
 | `build_motion_comic.py` | Adds camera motion, subtitles, and audio | `motion-comic.mp4` |
 | `generate_video.py` | Uploads a start frame and runs Wan2.2 image-to-video | `*.mp4` |
+| `finalize_comic.py` | Adds sound design, loudness normalization, and final encode | `*-final.mp4` |
 
 ## Prerequisites
 
@@ -174,7 +175,7 @@ suitable for mobile short-video delivery.
 
 `image-to-video.api.json` is the API form of the Wan2.2 TI2V 5B workflow. It
 uses `Wan22ImageToVideoLatent`, `KSampler`, `CreateVideo`, and `SaveVideo`.
-The default draft size is 480x832, 81 frames at 24 fps. The node requires
+The default is 704x1280, 81 frames at 24 fps (3.375 seconds). The node requires
 `length` to be `4n+1` (49, 81, or 121).
 
 Start the separate video instance first, then upload one panel and submit the
@@ -186,13 +187,42 @@ python deploy/k8s/comfyui/workflows/generate_video.py `
   --token BbRgXAscdqiw2amNHZQpvfK9xGPJDnjL `
   --image outputs/comfyui/storyboard_demo_v3/03_eye_closeup_01.png `
   --prompt "A detective turns toward the camera in heavy neon rain, slow push-in, consistent face" `
-  --width 480 --height 832 --length 81 `
+  --width 704 --height 1280 --length 81 `
   --output outputs/comfyui/video/wan22-smoke.mp4
 ```
 
-For a 5 second final shot use `--length 121`. Start at 480x832 for iteration;
-switch to 704x1280 only after the draft passes, because VRAM and runtime rise
-substantially at 720p.
+Measured on one RTX 4090 with 24 GB:
+
+| Size | Frames | Steps | Time | Peak VRAM | Result |
+| --- | --- | --- | --- | --- | --- |
+| 480x832 | 49 | 12 | 22.6 s | about 15 GB | clean smoke test |
+| 480x832 | 121 | 20 | 63.4 s | 20.6 GB | color drift at the end |
+| 704x1280 | 49 | 20 | 61.9 s | 21.3 GB | clean |
+| 704x1280 | 81 | 20 | 114.4 s | about 21 GB | clean, recommended |
+| 704x1280 | 121 | 20 | 180.3 s | 23.9 GB | hand/black-box hallucination at the end |
+
+Use 81 frames per shot at 704x1280. Wan2.2 5B is not reliable for five second
+single shots on 24 GB; build the comic from 3.4 second cuts instead. Longer
+clips can be split and stitched in the edit.
+
+## Final mix and delivery
+
+`finalize_comic.py` adds a low procedural drone and a heartbeat, mixes them
+under the existing voice and rain track, normalizes the result to -16 LUFS,
+and limits true peak to -1.6 dBTP. The video stream is copied without another
+generation loss and the audio is encoded as 48 kHz stereo AAC at 192 kbps.
+
+```bash
+kubectl -n comfyui exec deploy/comfyui -- \
+  /opt/environments/python/comfyui/bin/python \
+  /workspace/workflows/finalize_comic.py \
+  --video /workspace/ComfyUI/output/storyboard_demo_v3/motion-comic.mp4 \
+  --output /workspace/ComfyUI/output/storyboard_demo_v3/motion-comic-final.mp4 \
+  --title "Rainy Night Motion Comic"
+```
+
+The current final cut is 19.76 seconds, 1080x1920 at 25 fps. See
+`RELEASE_NOTE.md` for the delivery summary.
 
 ## Output and polling
 

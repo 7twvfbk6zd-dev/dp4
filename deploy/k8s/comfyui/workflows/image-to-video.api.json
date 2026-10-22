@@ -23,7 +23,7 @@
   "6": {
     "class_type": "CLIPTextEncode",
     "inputs": {
-      "text": "A cinematic vertical shot of a detective in a rainy neon city. Slow camera push-in, subtle rain, stable character identity, film grain, high detail.",
+      "text": "The detective stands still in the rainy alley. Slow subtle push-in, rain streaks, stable colors and anatomy, consistent character, cinematic.",
       "clip": [
         "38",
         0
@@ -33,7 +33,7 @@
   "7": {
     "class_type": "CLIPTextEncode",
     "inputs": {
-      "text": "low quality, blurry, deformed, distorted face, extra limbs, flicker, subtitles, watermark, text",
+      "text": "low quality, blurry, deformed, distorted face, extra limbs, hands, black boxes, color shift, oversaturated, flicker, subtitles, watermark, text",
       "clip": [
         "38",
         0
@@ -80,8 +80,8 @@
   "55": {
     "class_type": "Wan22ImageToVideoLatent",
     "inputs": {
-      "width": 480,
-      "height": 832,
+      "width": 704,
+      "height": 1280,
       "length": 81,
       "batch_size": 1,
       "vae": [

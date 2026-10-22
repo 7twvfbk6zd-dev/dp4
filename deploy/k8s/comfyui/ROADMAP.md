@@ -45,21 +45,33 @@ Status: done.
 
 ## 5. Image-to-video
 
-Status: pending, requires a separate evaluation.
+Status: done.
 
 - Evaluate a small image-to-video model that fits one 24 GB RTX 4090.
 - Prefer a separate ComfyUI deployment or job queue so `ds4` GPU 4-7 remain
   untouched.
 - Do not replace the current SDXL deployment until a video workflow passes a
   smoke test.
+- Selected Wan2.2 TI2V 5B on a separate `comfyui-video` deployment at
+  `http://172.16.0.168:30189`.
+- A 704x1280, 81-frame, 20-step shot takes about 114 seconds and stays below
+  22 GB. This is the recommended production setting.
+- A 121-frame 720p shot reaches 23.9 GB and develops hand/black-box
+  hallucinations near the end. Use 3.4 second shots rather than five second
+  single shots.
+- The original SDXL deployment remains on its known-good build; the video
+  deployment uses ComfyUI v0.3.68 on its own volume.
 
 ## 6. Assembly and delivery
 
-Status: pending.
+Status: done.
 
 - Add background music or sound design.
 - Normalize audio, encode the final file, and write a short release note.
 - Keep generated media under `outputs/` and out of Git.
+- Output: 19.76 second vertical 1080x1920 H.264/AAC final with procedural
+  drone and heartbeat, normalized to approximately -16 LUFS and -1.6 dBTP.
+- Release note: `workflows/RELEASE_NOTE.md`.
 
 ## Resource rules
 

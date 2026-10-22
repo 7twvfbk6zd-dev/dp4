@@ -135,10 +135,10 @@ def main():
         raise SystemExit(f"image not found: {args.image}")
     if args.length < 5 or (args.length - 1) % 4 != 0:
         raise SystemExit("--length must be 4n+1, for example 49, 81, or 121")
-    if args.width is not None and args.width % 16 != 0:
-        raise SystemExit("--width must be divisible by 16")
-    if args.height is not None and args.height % 16 != 0:
-        raise SystemExit("--height must be divisible by 16")
+    if args.width is not None and args.width % 32 != 0:
+        raise SystemExit("--width must be divisible by 32")
+    if args.height is not None and args.height % 32 != 0:
+        raise SystemExit("--height must be divisible by 32")
 
     workflow = json.loads(args.workflow.read_text(encoding="utf-8"))
     image_name = upload_image(args.server, args.token, args.image, 120)
