@@ -103,7 +103,7 @@ spec:
           value: |-
             false
         - name: PROVISIONING_SCRIPT
-          value: https://cdn.jsdelivr.net/gh/7twvfbk6zd-dev/dp4@0207e9d702bcb7ec8099c34fe3bf854a82217445/deploy/k8s/comfyui/provision-comfyui.sh
+          value: https://cdn.jsdelivr.net/gh/7twvfbk6zd-dev/dp4@6fc5b3962fef228d65a443b29c521e1f2eb1a680/deploy/k8s/comfyui/provision-comfyui.sh
         ports:
         - name: http
           containerPort: 8188
