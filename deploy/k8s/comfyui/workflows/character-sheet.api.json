@@ -1,0 +1,89 @@
+{
+  "prompt": {
+    "1": {
+      "inputs": {
+        "ckpt_name": "sd_xl_base_1.0.safetensors"
+      },
+      "class_type": "CheckpointLoaderSimple"
+    },
+    "2": {
+      "inputs": {
+        "text": "masterpiece, best quality, character reference sheet, solo, adult female detective, short black bob hair, amber eyes, navy trench coat, white shirt, red tie, black gloves, full body front view, neutral gray background, clean anime line art, flat cel shading, consistent character design, detailed face",
+        "clip": [
+          "1",
+          1
+        ]
+      },
+      "class_type": "CLIPTextEncode"
+    },
+    "3": {
+      "inputs": {
+        "text": "lowres, blurry, bad anatomy, extra fingers, extra limbs, deformed face, text, watermark, logo, multiple views, cropped, out of frame",
+        "clip": [
+          "1",
+          1
+        ]
+      },
+      "class_type": "CLIPTextEncode"
+    },
+    "4": {
+      "inputs": {
+        "batch_size": 1,
+        "width": 768,
+        "height": 1024
+      },
+      "class_type": "EmptyLatentImage"
+    },
+    "5": {
+      "inputs": {
+        "denoise": 1,
+        "seed": 20261023,
+        "negative": [
+          "3",
+          0
+        ],
+        "cfg": 6.5,
+        "sampler_name": "dpmpp_2m",
+        "latent_image": [
+          "4",
+          0
+        ],
+        "positive": [
+          "2",
+          0
+        ],
+        "model": [
+          "1",
+          0
+        ],
+        "steps": 28,
+        "scheduler": "karras"
+      },
+      "class_type": "KSampler"
+    },
+    "6": {
+      "inputs": {
+        "samples": [
+          "5",
+          0
+        ],
+        "vae": [
+          "1",
+          2
+        ]
+      },
+      "class_type": "VAEDecode"
+    },
+    "7": {
+      "inputs": {
+        "images": [
+          "6",
+          0
+        ],
+        "filename_prefix": "character_sheet"
+      },
+      "class_type": "SaveImage"
+    }
+  },
+  "client_id": "dp4-character-sheet"
+}

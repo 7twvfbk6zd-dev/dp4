@@ -77,6 +77,12 @@ sudo chown -R 1000:1000 /mapdata1/comfyui/ComfyUI/models
 Refresh the ComfyUI page after downloading so the model selectors rescan the
 directories.
 
+## Workflows
+
+The reproducible character-sheet and character-consistent comic-panel API
+workflows are in `workflows/`. See `workflows/README.md` for upload, submit,
+polling, and tuning instructions.
+
 ## Storage
 
 `/mapdata1/comfyui` is mounted at `/workspace`. AI-Dock stores generated

@@ -1,0 +1,221 @@
+{
+  "prompt": {
+    "1": {
+      "inputs": {
+        "ckpt_name": "sd_xl_base_1.0.safetensors"
+      },
+      "class_type": "CheckpointLoaderSimple"
+    },
+    "2": {
+      "inputs": {
+        "text": "masterpiece, best quality, solo, adult female detective wearing a dark navy blue double-breasted trench coat, short black bob hair, red eyes, white shirt, red tie, medium shot, standing in a rainy neon city street at night, bright neon signs, wet pavement reflections, city buildings, dramatic cyan and magenta rim lighting, cinematic anime comic panel, clean line art, high detail",
+        "clip": [
+          "1",
+          1
+        ]
+      },
+      "class_type": "CLIPTextEncode"
+    },
+    "3": {
+      "inputs": {
+        "text": "lowres, blurry, bad anatomy, extra fingers, extra limbs, deformed face, text, watermark, logo, multiple views, character sheet, plain background, white coat, gray coat, beige coat, light coat, studio backdrop, duplicate person, cropped face, out of frame",
+        "clip": [
+          "1",
+          1
+        ]
+      },
+      "class_type": "CLIPTextEncode"
+    },
+    "4": {
+      "inputs": {
+        "image": "character_ref.png"
+      },
+      "class_type": "LoadImage"
+    },
+    "5": {
+      "inputs": {
+        "x": 270,
+        "y": 0,
+        "width": 280,
+        "height": 300,
+        "image": [
+          "4",
+          0
+        ]
+      },
+      "class_type": "ImageCrop"
+    },
+    "6": {
+      "inputs": {
+        "crop": "center",
+        "upscale_method": "lanczos",
+        "width": 512,
+        "height": 512,
+        "image": [
+          "5",
+          0
+        ]
+      },
+      "class_type": "ImageScale"
+    },
+    "7": {
+      "inputs": {
+        "preset": "PLUS FACE (portraits)",
+        "model": [
+          "1",
+          0
+        ]
+      },
+      "class_type": "IPAdapterUnifiedLoader"
+    },
+    "8": {
+      "inputs": {
+        "image": [
+          "6",
+          0
+        ],
+        "weight_type": "linear",
+        "weight": 0.72,
+        "end_at": 1,
+        "ipadapter": [
+          "7",
+          1
+        ],
+        "embeds_scaling": "V only",
+        "model": [
+          "7",
+          0
+        ],
+        "combine_embeds": "concat",
+        "start_at": 0
+      },
+      "class_type": "IPAdapterAdvanced"
+    },
+    "9": {
+      "inputs": {
+        "x": 170,
+        "y": 0,
+        "width": 440,
+        "height": 1024,
+        "image": [
+          "4",
+          0
+        ]
+      },
+      "class_type": "ImageCrop"
+    },
+    "10": {
+      "inputs": {
+        "crop": "center",
+        "upscale_method": "lanczos",
+        "width": 512,
+        "height": 1024,
+        "image": [
+          "9",
+          0
+        ]
+      },
+      "class_type": "ImageScale"
+    },
+    "11": {
+      "inputs": {
+        "high_threshold": 0.8,
+        "low_threshold": 0.4,
+        "image": [
+          "10",
+          0
+        ]
+      },
+      "class_type": "Canny"
+    },
+    "12": {
+      "inputs": {
+        "control_net_name": "controlnet-canny-sdxl-fp16.safetensors"
+      },
+      "class_type": "ControlNetLoader"
+    },
+    "13": {
+      "inputs": {
+        "strength": 0.38,
+        "control_net": [
+          "12",
+          0
+        ],
+        "negative": [
+          "3",
+          0
+        ],
+        "start_percent": 0,
+        "image": [
+          "11",
+          0
+        ],
+        "end_percent": 0.4,
+        "positive": [
+          "2",
+          0
+        ]
+      },
+      "class_type": "ControlNetApplyAdvanced"
+    },
+    "14": {
+      "inputs": {
+        "batch_size": 1,
+        "width": 640,
+        "height": 1024
+      },
+      "class_type": "EmptyLatentImage"
+    },
+    "15": {
+      "inputs": {
+        "denoise": 1,
+        "seed": 20261027,
+        "negative": [
+          "13",
+          1
+        ],
+        "cfg": 7,
+        "sampler_name": "dpmpp_2m",
+        "latent_image": [
+          "14",
+          0
+        ],
+        "positive": [
+          "13",
+          0
+        ],
+        "model": [
+          "8",
+          0
+        ],
+        "steps": 30,
+        "scheduler": "karras"
+      },
+      "class_type": "KSampler"
+    },
+    "16": {
+      "inputs": {
+        "samples": [
+          "15",
+          0
+        ],
+        "vae": [
+          "1",
+          2
+        ]
+      },
+      "class_type": "VAEDecode"
+    },
+    "17": {
+      "inputs": {
+        "images": [
+          "16",
+          0
+        ],
+        "filename_prefix": "comic_panel"
+      },
+      "class_type": "SaveImage"
+    }
+  },
+  "client_id": "dp4-comic-panel"
+}
