@@ -1,0 +1,55 @@
+{
+  "character": "adult female detective wearing a dark navy blue double-breasted trench coat, short black bob hair, red eyes, white shirt, red tie",
+  "style": "cinematic anime comic panel, clean line art, high detail",
+  "negative": "lowres, blurry, bad anatomy, extra fingers, extra limbs, deformed face, text, watermark, logo, character sheet, plain background, white coat, gray coat, beige coat, studio backdrop, duplicate person, cropped face, out of frame",
+  "panels": [
+    {
+      "name": "01_alley_wide",
+      "prompt": "wide establishing shot, walking alone through a rain-soaked neon alley, full body, distant city lights, reflective puddles, falling rain",
+      "seed": 20261031,
+      "control_strength": 0.0,
+      "control_end_percent": 0.0,
+      "width": 768,
+      "height": 1024,
+      "steps": 30,
+      "cfg": 7.0,
+      "ipadapter_weight": 0.72
+    },
+    {
+      "name": "02_sign_look_up",
+      "prompt": "medium shot from the side, stopping under a flickering neon sign, looking up, rain on the coat, cyan and magenta lighting, tense expression",
+      "seed": 20261032,
+      "control_strength": 0.0,
+      "control_end_percent": 0.0,
+      "width": 768,
+      "height": 1024,
+      "steps": 30,
+      "cfg": 7.0,
+      "ipadapter_weight": 0.72
+    },
+    {
+      "name": "03_eye_closeup",
+      "prompt": "extreme close-up portrait, red eyes reflecting neon signs, rain droplets on face, tense expression, shallow depth of field",
+      "seed": 20261033,
+      "control_strength": 0.0,
+      "control_end_percent": 0.0,
+      "width": 768,
+      "height": 768,
+      "steps": 30,
+      "cfg": 7.0,
+      "ipadapter_weight": 0.78
+    },
+    {
+      "name": "04_action_turn",
+      "prompt": "medium action shot, turning toward camera, coat flaring, reaching for a badge, dramatic backlight, rain and neon reflections",
+      "seed": 20261034,
+      "control_strength": 0.0,
+      "control_end_percent": 0.0,
+      "width": 768,
+      "height": 1024,
+      "steps": 30,
+      "cfg": 7.0,
+      "ipadapter_weight": 0.72
+    }
+  ]
+}

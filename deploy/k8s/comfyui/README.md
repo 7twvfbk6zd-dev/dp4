@@ -79,9 +79,9 @@ directories.
 
 ## Workflows
 
-The reproducible character-sheet and character-consistent comic-panel API
+The reproducible character-sheet, comic-panel, and four-panel storyboard
 workflows are in `workflows/`. See `workflows/README.md` for upload, submit,
-polling, and tuning instructions.
+batch generation, polling, and tuning instructions.
 
 ## Storage
 
