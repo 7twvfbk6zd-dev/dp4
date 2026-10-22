@@ -1,0 +1,38 @@
+# Import the locally pulled monitoring images into containerd's k8s.io
+# namespace. The node's containerd socket is root-only, so this runs a
+# privileged pod that chroots into the host.
+#
+#   docker save -o /tmp/aiops-images.tar \
+#     docker.m.daocloud.io/calciumion/new-api:v1.0.0-rc.46 \
+#     docker.m.daocloud.io/grafana/grafana:11.4.0 \
+#     nvcr.io/nvidia/k8s/dcgm-exporter:4.6.1-4.8.4-distroless \
+#     quay.io/prometheus/prometheus:v3.15.1 \
+#     quay.io/prometheus/node-exporter:v1.12.1
+#   kubectl apply -f deploy/monitoring/import-images.yaml
+#   kubectl wait --for=condition=Completed pod/aiops-imgimport --timeout=300s
+#   kubectl delete pod/aiops-imgimport
+apiVersion: v1
+kind: Pod
+metadata:
+  name: aiops-imgimport
+  namespace: default
+spec:
+  restartPolicy: Never
+  hostPID: true
+  containers:
+    - name: c
+      image: ubuntu:20.04
+      imagePullPolicy: IfNotPresent
+      securityContext:
+        privileged: true
+      command: ["bash", "-lc"]
+      args:
+        - chroot /host /usr/bin/ctr -n k8s.io images import /tmp/aiops-images.tar &&
+          chroot /host /usr/bin/ctr -n k8s.io images ls | grep -E 'new-api|grafana|dcgm-exporter|prometheus|node-exporter'
+      volumeMounts:
+        - name: host
+          mountPath: /host
+  volumes:
+    - name: host
+      hostPath:
+        path: /
