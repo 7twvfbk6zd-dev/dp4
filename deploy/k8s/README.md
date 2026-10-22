@@ -55,6 +55,14 @@ kubectl -n ds4 scale deploy/ds4 --replicas=1
 kubectl delete -f deploy/k8s/ds4.yaml         # remove namespace + service
 ```
 
+## Multi-session batching
+
+`--batched-session` is disabled (`DS4_BATCHED_SESSION=0`). On 24GB cards the
+planner requires 25.5-27.9GiB *before* the expert cache for two sessions, which
+exceeds the 23.5GiB safe budget, and the TP path additionally deadlocks at the
+rank gate. Requests from multiple clients are therefore queued on one resident
+session.
+
 ## Design notes
 
 - `replicas: 1` is deliberate. Each replica needs 4 exclusive GPUs, and the

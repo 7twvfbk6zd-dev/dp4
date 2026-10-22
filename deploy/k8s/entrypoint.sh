@@ -6,6 +6,7 @@ CTX=${DS4_CTX:-131072}
 CACHE=${DS4_EXPERT_CACHE:-512}
 PREFILL=${DS4_PREFILL:-2048}
 WORLD=${DS4_TP_WORLD:-4}
+BATCHED=${DS4_BATCHED_SESSION:-0}
 VIS=${CUDA_VISIBLE_DEVICES:-0,1,2,3}
 pick() { echo "$VIS" | cut -d, -f"$1"; }
 
@@ -24,13 +25,17 @@ export DS4_METAL_DISABLE_V41_8K_CHUNK=1
 export DS4_TP_RUN_ID="$(date +%s%N)-$$"
 
 COMMON=(--cuda --ssd-streaming --ctx "$CTX" --ssd-streaming-cache-experts "$CACHE" --prefill-chunk "$PREFILL" -m "$MODEL" --vision "$VISION" --tensor-parallel)
+LEADER_EXTRA=()
+if [ "$BATCHED" -gt 0 ]; then
+  LEADER_EXTRA+=(--batched-session "$BATCHED")
+fi
 
 cleanup() { kill $(jobs -p) 2>/dev/null; wait 2>/dev/null; }
 trap cleanup TERM INT
 
-echo "ds4: starting rank 0 on gpu $(pick 1)"
+echo "ds4: starting rank 0 on gpu $(pick 1) (batched_session=${BATCHED})"
 CUDA_VISIBLE_DEVICES=$(pick 1) DS4_LOCK_FILE=/tmp/ds4-leader.lock \
-  /opt/ds4/ds4-server "${COMMON[@]}" --role coordinator --listen 127.0.0.1 19090 --host 0.0.0.0 --port 18080 &
+  /opt/ds4/ds4-server "${COMMON[@]}" "${LEADER_EXTRA[@]}" --role coordinator --listen 127.0.0.1 19090 --host 0.0.0.0 --port 18080 &
 sleep 3
 
 slot=2

@@ -29,17 +29,21 @@ spec:
       terminationGracePeriodSeconds: 30
       containers:
       - name: ds4
-        image: ds4:v2
+        image: ds4:v3
         imagePullPolicy: IfNotPresent
         env:
         - name: DS4_CTX
           value: "131072"
         - name: DS4_EXPERT_CACHE
-          value: "512"
+          value: "384"
         - name: DS4_PREFILL
           value: "2048"
         - name: DS4_TP_WORLD
           value: "4"
+        # 2 sessions need ~25.5-27.9GiB before the expert cache on 24GB cards;
+        # the TP path also deadlocks at the rank gate, so keep this at 0.
+        - name: DS4_BATCHED_SESSION
+          value: "0"
         resources:
           requests:
             cpu: "16"
@@ -75,7 +79,6 @@ spec:
         hostPath:
           path: /mapdata1/tools/ds4-main/gguf
           type: Directory
-      # TP uses shared memory for the rank gate; the 64Mi default is too small.
       - name: shm
         emptyDir:
           medium: Memory
