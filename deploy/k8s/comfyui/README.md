@@ -31,6 +31,9 @@ server starts. The version is set by `COMFYUI_REF` in `comfyui.yaml`. The
 provisioning script keeps `models`, `input`, `output`, `custom_nodes`, and
 `user`, and writes a source-only rollback archive under
 `/mapdata1/comfyui/.rollback` before replacing an existing tree.
+The script URL is pinned to a jsDelivr commit because the 168 node cannot
+reliably reach `raw.githubusercontent.com`; update both manifests when the
+provisioning script changes.
 
 Read the token and open the UI:
 
