@@ -10,6 +10,9 @@ normal ComfyUI output directory.
 | `comic-panel.api.json` | Creates a scene with the same face and outfit | `comic_panel` |
 | `storyboard.example.json` | Four-panel shot list with per-panel overrides | n/a |
 | `generate_storyboard.py` | Submits the shot list and builds a contact sheet | `storyboard_*` |
+| `render_comic_page.py` | Adds captions, bubbles, and page layout | `comic-page.png` |
+| `generate_voiceover.ps1` | Windows Chinese TTS for captions and dialogue | `*.wav` |
+| `build_voice_timeline.py` | Builds SRT, timing JSON, and combined audio | `timeline.json` |
 
 ## Prerequisites
 
@@ -90,6 +93,58 @@ it at `0.0` for wide, close-up, and reaction shots.
 
 The contact sheet is saved as `contact-sheet.png` inside the output directory.
 Pillow is required for the sheet; image generation continues without it.
+
+## Dialogue page
+
+After the panels have been downloaded, render a comic page with Chinese
+captions and speech bubbles:
+
+```bash
+python3 deploy/k8s/comfyui/workflows/render_comic_page.py \
+  --storyboard deploy/k8s/comfyui/workflows/storyboard.example.json \
+  --images-dir outputs/comfyui/storyboard_demo_v3 \
+  --output outputs/comfyui/storyboard_demo_v3/comic-page.png
+```
+
+The page uses two columns for up to four panels and three columns for five or
+more. The renderer accepts `caption`, `caption_position`, `dialogue`,
+`dialogue_position`, and `focus_y` in each panel. Page-level fields are `title`,
+`subtitle`, and `footer`.
+
+On Windows the default font is Microsoft YaHei. On Linux, install a CJK font
+and pass it explicitly:
+
+```bash
+python3 render_comic_page.py ... \
+  --font /usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc \
+  --bold-font /usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc
+```
+
+## Voiceover and subtitles
+
+Generate one Chinese clip per caption or dialogue line with the Windows
+Huihui voice:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File `
+  deploy/k8s/comfyui/workflows/generate_voiceover.ps1 `
+  -Storyboard deploy/k8s/comfyui/workflows/storyboard.example.json `
+  -OutputDir outputs/comfyui/storyboard_demo_v3/audio
+```
+
+Then build the timed SRT, timeline, and a single combined WAV:
+
+```bash
+python3 deploy/k8s/comfyui/workflows/build_voice_timeline.py \
+  --voiceover outputs/comfyui/storyboard_demo_v3/audio/voiceover.json \
+  --timeline outputs/comfyui/storyboard_demo_v3/audio/timeline.json \
+  --srt outputs/comfyui/storyboard_demo_v3/audio/comic.srt \
+  --combined outputs/comfyui/storyboard_demo_v3/audio/voiceover.wav
+```
+
+The voice script uses rate `-2` for dialogue and rate `0` for narration. The
+timeline adds a 0.4 second lead-in and 0.35 second gaps, which are also used by
+the motion-comic renderer.
 
 ## Output and polling
 

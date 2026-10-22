@@ -2,6 +2,9 @@
   "character": "adult female detective wearing a dark navy blue double-breasted trench coat, short black bob hair, red eyes, white shirt, red tie",
   "style": "cinematic anime comic panel, clean line art, high detail",
   "negative": "lowres, blurry, bad anatomy, extra fingers, extra limbs, deformed face, text, watermark, logo, character sheet, plain background, white coat, gray coat, beige coat, studio backdrop, duplicate person, cropped face, out of frame",
+  "title": "\u96e8\u591c\u8ffd\u8e2a",
+  "subtitle": "NEON TRACE \u00b7 \u7b2c\u4e00\u8bdd",
+  "footer": "AI COMIC / COMFYUI / 168 \u00b7 SDXL + IP-Adapter",
   "panels": [
     {
       "name": "01_alley_wide",
@@ -13,7 +16,10 @@
       "height": 1024,
       "steps": 30,
       "cfg": 7.0,
-      "ipadapter_weight": 0.72
+      "ipadapter_weight": 0.72,
+      "caption": "\u96e8\u591c\uff0c\u9713\u8679\u57ce\u3002",
+      "caption_position": "top_right",
+      "focus_y": 0.38
     },
     {
       "name": "02_sign_look_up",
@@ -25,7 +31,10 @@
       "height": 1024,
       "steps": 30,
       "cfg": 7.0,
-      "ipadapter_weight": 0.72
+      "ipadapter_weight": 0.72,
+      "dialogue": "\u8fd9\u6761\u8857\u2026\u2026\u592a\u5b89\u9759\u4e86\u3002",
+      "dialogue_position": "top_left",
+      "focus_y": 0.3
     },
     {
       "name": "03_eye_closeup",
@@ -37,7 +46,10 @@
       "height": 768,
       "steps": 30,
       "cfg": 7.0,
-      "ipadapter_weight": 0.78
+      "ipadapter_weight": 0.78,
+      "dialogue": "\u6709\u4eba\u4e00\u76f4\u5728\u8ddf\u7740\u6211\u3002",
+      "dialogue_position": "bottom",
+      "focus_y": 0.42
     },
     {
       "name": "04_action_turn",
@@ -49,7 +61,40 @@
       "height": 1024,
       "steps": 30,
       "cfg": 7.0,
-      "ipadapter_weight": 0.72
+      "ipadapter_weight": 0.72,
+      "dialogue": "\u627e\u5230\u4f60\u4e86\u3002",
+      "dialogue_position": "top_right",
+      "focus_y": 0.34
+    },
+    {
+      "name": "05_footsteps",
+      "prompt": "low angle insert shot, black boots stepping through a rain puddle, red and cyan neon reflections, ripples, no face, cinematic detail",
+      "seed": 20261035,
+      "control_strength": 0.0,
+      "control_end_percent": 0.0,
+      "width": 768,
+      "height": 1024,
+      "steps": 30,
+      "cfg": 7.0,
+      "ipadapter_weight": 0.45,
+      "caption": "\u811a\u6b65\u58f0\uff0c\u505c\u4e86\u3002",
+      "caption_position": "top",
+      "focus_y": 0.5
+    },
+    {
+      "name": "06_final",
+      "prompt": "medium close-up, detective looking off-screen, hand resting on a holster, rain and neon, determined expression, cliffhanger, cinematic anime comic panel",
+      "seed": 20261036,
+      "control_strength": 0.0,
+      "control_end_percent": 0.0,
+      "width": 768,
+      "height": 1024,
+      "steps": 30,
+      "cfg": 7.0,
+      "ipadapter_weight": 0.76,
+      "dialogue": "\u4e0b\u4e00\u4e2a\uff0c\u5c31\u662f\u4f60\u3002",
+      "dialogue_position": "top_left",
+      "focus_y": 0.35
     }
   ]
 }

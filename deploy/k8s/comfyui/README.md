@@ -81,7 +81,8 @@ directories.
 
 The reproducible character-sheet, comic-panel, and four-panel storyboard
 workflows are in `workflows/`. See `workflows/README.md` for upload, submit,
-batch generation, polling, and tuning instructions.
+batch generation, dialogue layout, polling, and tuning instructions. The
+phased plan and current status are tracked in `ROADMAP.md`.
 
 ## Storage
 
