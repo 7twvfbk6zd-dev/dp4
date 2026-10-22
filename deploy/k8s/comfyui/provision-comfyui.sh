@@ -53,6 +53,13 @@ import av
 import comfy_aimdo
 import comfy_kitchen
 import torch
+from packaging.version import Version
+
+torch_version = Version(torch.__version__.split("+", 1)[0])
+if torch_version < Version("2.8.0"):
+    raise RuntimeError(f"PyTorch 2.8+ is required, found {torch.__version__}")
+if not torch.version.cuda or Version(torch.version.cuda) < Version("12.8"):
+    raise RuntimeError(f"CUDA 12.8+ wheels are required, found {torch.version.cuda}")
 PY
 }
 
@@ -113,16 +120,19 @@ if [[ "$CURRENT_VERSION" != "$REF_VERSION" ]]; then
 fi
 
 cat > "$CONSTRAINTS" <<'EOF'
-torch==2.4.1+cu121
-torchvision==0.19.1+cu121
-torchaudio==2.4.1+cu121
+torch==2.8.0+cu128
+torchvision==0.23.0+cu128
+torchaudio==2.8.0+cu128
 EOF
 
 echo "Installing ComfyUI $REF dependencies for $INSTANCE"
+if "$VENV/bin/pip" show xformers >/dev/null 2>&1; then
+  "$VENV/bin/pip" uninstall -y xformers
+fi
 PIP_DISABLE_PIP_VERSION_CHECK=1 "$VENV/bin/pip" install --no-cache-dir \
   -r "$COMFYUI_DIR/requirements.txt" \
   -c "$CONSTRAINTS" \
-  --extra-index-url https://download.pytorch.org/whl/cu121
+  --extra-index-url https://download.pytorch.org/whl/cu128
 
 if ! "$VENV/bin/pip" check; then
   echo "WARNING: pip check reported dependency conflicts" >&2

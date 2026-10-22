@@ -35,6 +35,13 @@ The script URL is pinned to a jsDelivr commit because the 168 node cannot
 reliably reach `raw.githubusercontent.com`; update both manifests when the
 provisioning script changes.
 
+ComfyUI `v0.42.1` pulls in `comfy-aimdo`, which requires PyTorch 2.8+ and
+CUDA 12.8+. The provisioning constraints therefore upgrade the runtime to
+`torch 2.8.0+cu128`, `torchvision 0.23.0+cu128`, and
+`torchaudio 2.8.0+cu128`. The host driver is 570.133.07, which supports CUDA
+12.8. The old xformers wheel is removed because it is compiled against
+PyTorch 2.4; ComfyUI falls back to PyTorch scaled dot-product attention.
+
 Read the token and open the UI:
 
 ```bash
