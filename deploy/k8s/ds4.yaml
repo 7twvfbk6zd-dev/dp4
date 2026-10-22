@@ -35,7 +35,7 @@ spec:
         - name: DS4_CTX
           value: "131072"
         - name: DS4_EXPERT_CACHE
-          value: "384"
+          value: "512"
         - name: DS4_PREFILL
           value: "2048"
         - name: DS4_TP_WORLD
