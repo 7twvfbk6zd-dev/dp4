@@ -29,7 +29,7 @@ spec:
       terminationGracePeriodSeconds: 30
       containers:
       - name: ds4
-        image: ds4:v3
+        image: ds4:v4
         imagePullPolicy: IfNotPresent
         env:
         - name: DS4_CTX
@@ -44,6 +44,9 @@ spec:
         # the TP path also deadlocks at the rank gate, so keep this at 0.
         - name: DS4_BATCHED_SESSION
           value: "0"
+        # Browser and WebView clients need cross-origin response headers.
+        - name: DS4_CORS
+          value: "1"
         resources:
           requests:
             cpu: "16"

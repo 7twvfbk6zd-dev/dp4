@@ -63,6 +63,13 @@ exceeds the 23.5GiB safe budget, and the TP path additionally deadlocks at the
 rank gate. Requests from multiple clients are therefore queued on one resident
 session.
 
+## Browser and WebView clients
+
+The server starts with `--cors` (`DS4_CORS=1`). This is required by clients that
+run the API calls from a browser or WebView origin, such as the Chatbox mobile
+app. Without it, cross-origin requests fail with `Failed to fetch` even though
+`curl` and native desktop clients work.
+
 ## Design notes
 
 - `replicas: 1` is deliberate. Each replica needs 4 exclusive GPUs, and the
