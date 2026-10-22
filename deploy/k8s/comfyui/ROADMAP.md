@@ -59,8 +59,8 @@ Status: done.
 - A 121-frame 720p shot reaches 23.9 GB and develops hand/black-box
   hallucinations near the end. Use 3.4 second shots rather than five second
   single shots.
-- The original SDXL deployment remains on its known-good build; the video
-  deployment uses ComfyUI v0.3.68 on its own volume.
+- Both deployments now use ComfyUI v0.42.1 through the shared provisioning
+  script, with independent source trees and rollback archives.
 
 ## 6. Assembly and delivery
 

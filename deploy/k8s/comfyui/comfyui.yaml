@@ -100,9 +100,15 @@ spec:
         - name: COMFYUI_PORT_HOST
           value: |-
             8188
+        - name: COMFYUI_INSTANCE
+          value: main
+        - name: COMFYUI_REF
+          value: v0.42.1
         - name: CF_QUICK_TUNNELS
           value: |-
             false
+        - name: PROVISIONING_SCRIPT
+          value: https://raw.githubusercontent.com/7twvfbk6zd-dev/dp4/main/deploy/k8s/comfyui/provision-comfyui.sh
         ports:
         - name: http
           containerPort: 8188
@@ -127,6 +133,12 @@ spec:
           initialDelaySeconds: 30
           periodSeconds: 10
           failureThreshold: 30
+        startupProbe:
+          httpGet:
+            path: /ai-dock/health-check
+            port: http
+          periodSeconds: 10
+          failureThreshold: 180
         livenessProbe:
           httpGet:
             path: /ai-dock/health-check

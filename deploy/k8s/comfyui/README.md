@@ -26,6 +26,12 @@ kubectl apply -f deploy/k8s/comfyui/comfyui.yaml
 kubectl -n comfyui rollout status deploy/comfyui
 ```
 
+The deployment provisions the current ComfyUI release (`v0.42.1`) before the
+server starts. The version is set by `COMFYUI_REF` in `comfyui.yaml`. The
+provisioning script keeps `models`, `input`, `output`, `custom_nodes`, and
+`user`, and writes a source-only rollback archive under
+`/mapdata1/comfyui/.rollback` before replacing an existing tree.
+
 Read the token and open the UI:
 
 ```bash
@@ -84,9 +90,9 @@ experiments. It requests one GPU, uses its own data volume at
 `/mapdata1/comfyui-video`, and listens on NodePort `30189`. The existing SDXL
 deployment and `ds4` GPUs 4-7 are left untouched.
 
-The video instance provisions ComfyUI `v0.3.68` on its first start. This is
-the first release line used for the Wan2.2 smoke test; the original instance
-stays on its older, known-good build.
+Both ComfyUI instances provision the same release from `COMFYUI_REF` in their
+deployment manifests. The video instance keeps its own source tree and data
+volume, so it can be upgraded and tested independently of the SDXL instance.
 
 Create the host directory and deploy:
 
@@ -114,11 +120,17 @@ The model set is:
 Open `http://172.16.0.168:30189/?token=<token>` and use the API on the same
 port. Keep `30189` on the LAN and do not expose it to the public internet.
 
-The first startup can take several minutes while it checks out ComfyUI and
-installs the pinned requirements. The marker
-`/mapdata1/comfyui-video/.comfyui-video-provisioned` prevents the setup from
-running again on every restart. Remove the marker and restart the deployment
-only when intentionally upgrading the video instance.
+The first startup can take several minutes while it downloads ComfyUI and
+installs the pinned requirements. Startup is protected by a 30-minute
+`startupProbe`. On later restarts the script exits quickly when the recorded
+ref, `requirements.txt` hash, and required imports all match. Because the
+Python venv lives outside the persistent volume, missing packages are
+reinstalled automatically after a pod restart.
+
+To upgrade, change `COMFYUI_REF` in the deployment manifest, push the commit,
+then run `kubectl apply -f deploy/k8s/comfyui/comfyui.yaml` and
+`kubectl rollout restart deploy/comfyui`. Roll back by extracting the desired
+archive from `.rollback` after moving the current preserved directories aside.
 
 ## Workflows
 
