@@ -113,6 +113,9 @@ if [[ "$CURRENT_VERSION" != "$REF_VERSION" ]]; then
   mv "$STAGE" "$COMFYUI_DIR"
   for name in "${PRESERVE[@]}"; do
     if [[ -e "$BACKUP/$name" ]]; then
+      if [[ -e "$COMFYUI_DIR/$name" ]]; then
+        rm -rf "$COMFYUI_DIR/$name"
+      fi
       mv "$BACKUP/$name" "$COMFYUI_DIR/$name"
     fi
   done
