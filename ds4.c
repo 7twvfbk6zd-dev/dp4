@@ -73746,6 +73746,17 @@ static int ds4_engine_vision_encode_image(
             ds4_image_preprocess_deepseek41(&patches, image, error, error_cap) :
             ds4_image_preprocess_deepseek4(&patches, image, error, error_cap);
         if (!preprocessed) return 0;
+#if !defined(__APPLE__) && !defined(DS4_ROCM_BUILD)
+        /* A full-resolution V4.1 screenshot needs roughly 0.7-0.8 GiB of
+         * transient CUDA tensors. The streaming cache deliberately expands
+         * into most free VRAM, so a long live session can leave too little
+         * headroom and the encoder fails with cudaMalloc OOM. The request is
+         * serialized and no decode graph is in flight here: release the
+         * resident expert cache; decode refills it on demand. */
+        if (e->backend == DS4_BACKEND_CUDA && e->ssd_streaming) {
+            ds4_gpu_stream_expert_cache_release_resident();
+        }
+#endif
         token_count = patches.llm_grid_height * patches.llm_grid_width;
         embedding = malloc((size_t)token_count * DS4_N_EMBD * sizeof(float));
         if (embedding) {

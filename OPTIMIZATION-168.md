@@ -134,6 +134,19 @@ shared-memory gate data plane active and short-prompt decode rises from
 about 4.0-4.6 ms GPU sync and 13-31 ms exchange; exchange is dominated by the
 slowest rank's routed-expert work, not by the data plane itself.
 
+## Vision encoder OOM (2026-10-22)
+
+A 1080p screenshot returned `DeepSeek V4 vision inference failed`; the server
+log showed `CUDA tensor alloc failed: out of memory`. A V4.1 image encoder
+needs roughly 0.7-0.8 GiB of transient CUDA tensors for the maximum image
+token grid, while the SSD expert cache deliberately expands into almost all
+remaining VRAM.
+
+For CUDA SSD streaming, release the resident expert cache after image
+preprocessing and before the encoder allocates its workspace. Requests are
+serialized, so no decode graph is in flight; decode refills the cache on
+demand. The same 1080p screenshot now completes successfully in the lab.
+
 ## Multi-rank TP (4/8 GPUs)
 
 V4.1 Flash now supports expert-parallel TP on 4 or 8 GPUs. See

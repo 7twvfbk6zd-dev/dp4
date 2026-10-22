@@ -29,7 +29,7 @@ spec:
       terminationGracePeriodSeconds: 30
       containers:
       - name: ds4
-        image: ds4:v5
+        image: ds4:v6
         imagePullPolicy: IfNotPresent
         env:
         - name: DS4_CTX
