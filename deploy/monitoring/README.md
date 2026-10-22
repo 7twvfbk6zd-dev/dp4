@@ -70,6 +70,50 @@ Grafana:
 - user: `admin`
 - password: the `grafana-admin` secret value
 
+## Enforce gateway-only access
+
+`ds4` runs with `hostNetwork`, so Kubernetes NetworkPolicy cannot restrict it.
+The host-level guard drops every packet to `tcp/18080` except traffic from the
+cluster pod network (`10.244.0.0/16`), localhost, and the node IPs. External
+clients therefore have to use the New API gateway on `30300`.
+
+Install on the 168 host:
+
+```bash
+scp deploy/monitoring/host/ds4-ingress-guard.sh \
+    deploy/monitoring/host/ds4-ingress-guard.service \
+    xszn@172.16.0.168:/tmp/
+
+ssh xszn@172.16.0.168 '
+  sudo install -m 755 /tmp/ds4-ingress-guard.sh /usr/local/sbin/
+  sudo install -m 644 /tmp/ds4-ingress-guard.service /etc/systemd/system/
+  sudo systemctl daemon-reload
+  sudo systemctl enable --now ds4-ingress-guard.service
+'
+```
+
+Verify from outside the cluster:
+
+```bash
+curl -m 5 http://172.16.0.168:18080/v1/models   # times out
+curl -H "Authorization: Bearer $TOKEN" \
+  http://172.16.0.168:30300/v1/models           # 200
+```
+
+Disable and remove the rules:
+
+```bash
+sudo systemctl disable --now ds4-ingress-guard.service
+sudo iptables -D INPUT -s 10.244.0.0/16 -p tcp --dport 18080 -j ACCEPT
+sudo iptables -D INPUT -s 127.0.0.1/32 -p tcp --dport 18080 -j ACCEPT
+sudo iptables -D INPUT -s 192.168.5.170/32 -p tcp --dport 18080 -j ACCEPT
+sudo iptables -D INPUT -s 172.16.0.168/32 -p tcp --dport 18080 -j ACCEPT
+sudo iptables -D INPUT -p tcp --dport 18080 -j DROP
+```
+
+Update the pod CIDR in both the script and this document if the cluster
+network is reconfigured.
+
 ## Rollback
 
 Delete the workloads without deleting the PVCs first if you want to keep the

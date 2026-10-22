@@ -1,0 +1,12 @@
+[Unit]
+Description=Restrict DS4 API (tcp/18080) to in-cluster clients
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/ds4-ingress-guard.sh
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
