@@ -14,6 +14,7 @@ normal ComfyUI output directory.
 | `generate_voiceover.ps1` | Windows Chinese TTS for captions and dialogue | `*.wav` |
 | `build_voice_timeline.py` | Builds SRT, timing JSON, and combined audio | `timeline.json` |
 | `build_motion_comic.py` | Adds camera motion, subtitles, and audio | `motion-comic.mp4` |
+| `generate_video.py` | Uploads a start frame and runs Wan2.2 image-to-video | `*.mp4` |
 
 ## Prerequisites
 
@@ -168,6 +169,30 @@ The output is vertical 1080x1920 at 25 fps. Panels alternate between slow zoom
 and horizontal pan, subtitles are rendered with libass, and the voice track is
 mixed with generated rain ambience. The current cut is 19.76 seconds and is
 suitable for mobile short-video delivery.
+
+## Image-to-video
+
+`image-to-video.api.json` is the API form of the Wan2.2 TI2V 5B workflow. It
+uses `Wan22ImageToVideoLatent`, `KSampler`, `CreateVideo`, and `SaveVideo`.
+The default draft size is 480x832, 81 frames at 24 fps. The node requires
+`length` to be `4n+1` (49, 81, or 121).
+
+Start the separate video instance first, then upload one panel and submit the
+workflow from the workstation:
+
+```powershell
+python deploy/k8s/comfyui/workflows/generate_video.py `
+  --server http://172.16.0.168:30189 `
+  --token BbRgXAscdqiw2amNHZQpvfK9xGPJDnjL `
+  --image outputs/comfyui/storyboard_demo_v3/03_eye_closeup_01.png `
+  --prompt "A detective turns toward the camera in heavy neon rain, slow push-in, consistent face" `
+  --width 480 --height 832 --length 81 `
+  --output outputs/comfyui/video/wan22-smoke.mp4
+```
+
+For a 5 second final shot use `--length 121`. Start at 480x832 for iteration;
+switch to 704x1280 only after the draft passes, because VRAM and runtime rise
+substantially at 720p.
 
 ## Output and polling
 

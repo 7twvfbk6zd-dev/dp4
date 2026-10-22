@@ -77,6 +77,49 @@ sudo chown -R 1000:1000 /mapdata1/comfyui/ComfyUI/models
 Refresh the ComfyUI page after downloading so the model selectors rescan the
 directories.
 
+## Image-to-video evaluation
+
+`video.yaml` adds a second, isolated ComfyUI deployment for image-to-video
+experiments. It requests one GPU, uses its own data volume at
+`/mapdata1/comfyui-video`, and listens on NodePort `30189`. The existing SDXL
+deployment and `ds4` GPUs 4-7 are left untouched.
+
+The video instance provisions ComfyUI `v0.3.68` on its first start. This is
+the first release line used for the Wan2.2 smoke test; the original instance
+stays on its older, known-good build.
+
+Create the host directory and deploy:
+
+```bash
+mkdir -p /mapdata1/comfyui-video
+sudo chown -R 1000:1000 /mapdata1/comfyui-video
+kubectl apply -f deploy/k8s/comfyui/video.yaml
+kubectl -n comfyui rollout status deploy/comfyui-video --timeout=20m
+```
+
+Download the Wan2.2 TI2V 5B weights (about 18 GB):
+
+```bash
+bash deploy/k8s/comfyui/download-video-models.sh
+```
+
+The model set is:
+
+| Directory | Model | Purpose |
+| --- | --- | --- |
+| `diffusion_models` | `wan2.2_ti2v_5B_fp16.safetensors` | Wan2.2 5B video diffusion |
+| `text_encoders` | `umt5_xxl_fp8_e4m3fn_scaled.safetensors` | Text encoder |
+| `vae` | `wan2.2_vae.safetensors` | Wan2.2 video VAE |
+
+Open `http://172.16.0.168:30189/?token=<token>` and use the API on the same
+port. Keep `30189` on the LAN and do not expose it to the public internet.
+
+The first startup can take several minutes while it checks out ComfyUI and
+installs the pinned requirements. The marker
+`/mapdata1/comfyui-video/.comfyui-video-provisioned` prevents the setup from
+running again on every restart. Remove the marker and restart the deployment
+only when intentionally upgrading the video instance.
+
 ## Workflows
 
 The reproducible character-sheet, comic-panel, and four-panel storyboard
