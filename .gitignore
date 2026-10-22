@@ -1,0 +1,26 @@
+# build outputs
+*.o
+/ds4
+/ds4-server
+/ds4-agent
+/ds4-eval
+/ds4-bench
+
+# local backups (kept on disk, not in git)
+local-backup/
+*.bak
+*.bak-*
+
+# model weights and download chunks
+gguf/
+chunks/
+
+# runtime artifacts
+*.log
+*.pid
+*.lock
+tp-*.log
+
+# archives
+*.tar
+*.tar.gz

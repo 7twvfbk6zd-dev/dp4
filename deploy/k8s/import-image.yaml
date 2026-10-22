@@ -1,0 +1,33 @@
+# Import a locally built image into the node's containerd k8s.io namespace.
+# The node's containerd socket is root-only, so this runs a privileged pod
+# that chroots into the host and calls ctr.
+#
+#   docker save -o /tmp/ds4.tar ds4:v2
+#   kubectl apply -f import-image.yaml
+#   kubectl wait --for=condition=Completed pod/imgimport --timeout=300s
+#   kubectl delete pod imgimport
+apiVersion: v1
+kind: Pod
+metadata:
+  name: imgimport
+  namespace: default
+spec:
+  restartPolicy: Never
+  hostPID: true
+  containers:
+  - name: c
+    image: ubuntu:20.04
+    imagePullPolicy: IfNotPresent
+    securityContext:
+      privileged: true
+    command: ["bash","-lc"]
+    args:
+    - chroot /host /usr/bin/ctr -n k8s.io images import /tmp/ds4.tar &&
+      chroot /host /usr/bin/ctr -n k8s.io images ls | grep ds4
+    volumeMounts:
+    - name: host
+      mountPath: /host
+  volumes:
+  - name: host
+    hostPath:
+      path: /
