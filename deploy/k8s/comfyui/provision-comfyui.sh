@@ -82,8 +82,14 @@ if [[ "$CURRENT_VERSION" != "$REF_VERSION" ]]; then
   echo "Replacing ComfyUI $CURRENT_VERSION with $REF for $INSTANCE"
   rm -rf "$STAGE" "$BACKUP"
   mkdir -p "$STAGE" "$BACKUP" "$ROLLBACK_DIR"
-  curl -fL --retry 5 --retry-delay 3 --max-time 600 -o "$ARCHIVE" \
-    "https://codeload.github.com/Comfy-Org/ComfyUI/tar.gz/refs/tags/$REF"
+  if [[ -s "$ARCHIVE" ]] && tar -tzf "$ARCHIVE" >/dev/null 2>&1; then
+    echo "Using cached archive: $ARCHIVE"
+  else
+    rm -f "$ARCHIVE"
+    curl -fL --retry 3 --retry-delay 5 --connect-timeout 15 --max-time 300 \
+      -o "$ARCHIVE" \
+      "https://codeload.github.com/Comfy-Org/ComfyUI/tar.gz/refs/tags/$REF"
+  fi
   tar -xzf "$ARCHIVE" -C "$STAGE" --strip-components=1
   if [[ ! -f "$STAGE/main.py" ]]; then
     echo "Downloaded ComfyUI archive is incomplete" >&2
