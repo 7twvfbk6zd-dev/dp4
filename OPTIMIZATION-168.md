@@ -89,6 +89,36 @@ The Q8-F16 cache is a stock upstream knob, not a local patch.
 - Decode is PCIe-bound: 240 experts/token x 9.5 MiB at ~16 GiB/s. Larger caches
   and fewer F16 duplicates are the remaining single-rank levers.
 
+## V4.1 CUDA streaming cache budget (2026-10-22)
+
+The --ssd-streaming-cache-experts N option is a decode-cache target. The
+generic prefill path reserves two full expert layers inside that same target
+for MMQ staging. V4.1 CUDA already stages prefill experts in its own compact
+arena and frees it before decode, so the reserve was counted twice: with 768
+requested, memory admission re-fitted the target to 720, then split it into
+6.66 GiB prefill reserve plus 0.01 GiB decode cache, collapsing decode to 6-12
+expert slots per card.
+
+Skip the reservation only for V4.1 CUDA streaming. The prefill arena is
+allocated on demand and released on the first decode step. Measured on 4x
+RTX 4090, ctx=131072, prefill-chunk=2048:
+
+| cache target | short prompt, 128 tok | 60k prompt + 256 tok | steady decode |
+|---|---:|---:|---:|
+| 512 (before) | 15.5 t/s | - | 25.9-27.3 t/s |
+| 640 | 18.2-18.8 t/s | - | 26.8-28.6 t/s |
+| 768 (after fix) | 18.1-18.8 t/s | 80.0 s wall, 861 t/s prefill | 26-28.4 t/s |
+
+640 is the deployment default: it captures the decode gain without asking
+admission to trim 768 at startup. The runtime still expands the cache to the
+largest count that fits after context buffers are allocated.
+
+Rejected experiments: prefill-chunk=1024 (mixed/no consistent gain: fewer
+decode slots and a short-prompt regression; the 3.78 GiB workspace is not
+chunk-sized) and choosing the shared-expert owner by lowest local routed load
+(identical wall time; gate waits are dominated by the slowest routed-expert
+count, not the one shared expert).
+
 ## Multi-rank TP (4/8 GPUs)
 
 V4.1 Flash now supports expert-parallel TP on 4 or 8 GPUs. See

@@ -69583,7 +69583,17 @@ static bool ds4_engine_configure_streaming_cache_budget(ds4_engine *e) {
     uint64_t total_cache_bytes = e->ssd_streaming_cache_bytes;
     uint64_t prefill_headroom_bytes = 0;
     uint64_t budget_after_prefill_headroom = total_cache_bytes;
-    if (total_cache_bytes != 0) {
+    /* V4.1 CUDA streaming stages prefill experts through its own compact
+     * arena and releases it before decode. Reserving the headroom inside the
+     * explicit cache target would otherwise leave one layer's working set for
+     * decode (observed: 1 slot) as soon as memory admission had re-fitted an
+     * expert count to the card. Keep the requested cache; prefill allocates
+     * its arena on demand. */
+    const bool skip_prefill_headroom =
+        DS4_MODEL_FAMILY == DS4_MODEL_FAMILY_DEEPSEEK41 &&
+        e->backend == DS4_BACKEND_CUDA &&
+        e->ssd_streaming;
+    if (total_cache_bytes != 0 && !skip_prefill_headroom) {
         if (!ds4_streaming_prefill_headroom_bytes(&e->weights,
                                                   &prefill_headroom_bytes)) {
             fprintf(stderr,

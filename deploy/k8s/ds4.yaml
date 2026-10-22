@@ -35,7 +35,12 @@ spec:
         - name: DS4_CTX
           value: "131072"
         - name: DS4_EXPERT_CACHE
-          value: "512"
+          # 640 slots lifts steady-state 60k decode from 25.9-27.3 to
+          # 26.8-28.6 t/s on 4x RTX 4090. 768 also works after the V4.1
+          # prefill-headroom fix, but admission trims it at startup and the
+          # live cache is memory-bound; keep 640 unless re-measuring a long
+          # prefill.
+          value: "640"
         - name: DS4_PREFILL
           value: "2048"
         - name: DS4_TP_WORLD
