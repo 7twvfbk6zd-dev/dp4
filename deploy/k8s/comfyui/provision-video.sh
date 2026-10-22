@@ -13,9 +13,28 @@ if [[ -f "$MARKER" ]]; then
 fi
 
 cd "$COMFYUI_DIR"
-git remote set-url origin https://github.com/Comfy-Org/ComfyUI.git
-git fetch --depth 1 origin "refs/tags/$REF:refs/tags/$REF"
-git checkout -f "$REF"
+ARCHIVE="$WORKSPACE/.comfyui-$REF.tar.gz"
+STAGE="$WORKSPACE/.comfyui-$REF"
+BACKUP="$WORKSPACE/.comfyui-preserve"
+curl -fL --retry 5 --retry-delay 3 --max-time 300 -o "$ARCHIVE" \
+  "https://codeload.github.com/Comfy-Org/ComfyUI/tar.gz/refs/tags/$REF"
+rm -rf "$STAGE" "$BACKUP"
+mkdir -p "$STAGE" "$BACKUP"
+tar -xzf "$ARCHIVE" -C "$STAGE" --strip-components=1
+for name in models input output custom_nodes; do
+  if [[ -d "$COMFYUI_DIR/$name" ]]; then
+    mv "$COMFYUI_DIR/$name" "$BACKUP/$name"
+  fi
+done
+rm -rf "$COMFYUI_DIR"
+mv "$STAGE" "$COMFYUI_DIR"
+for name in models input output custom_nodes; do
+  if [[ -d "$BACKUP/$name" ]]; then
+    mv "$BACKUP/$name" "$COMFYUI_DIR/$name"
+  fi
+done
+rm -rf "$BACKUP" "$ARCHIVE"
+cd "$COMFYUI_DIR"
 
 cat > "$WORKSPACE/.video-constraints.txt" <<'EOF'
 torch==2.4.1+cu121
