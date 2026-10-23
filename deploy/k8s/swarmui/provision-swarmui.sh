@@ -5,6 +5,7 @@ set -euo pipefail
 ROOT="${SWARMUI_ROOT:-/mapdata1/swarmui}"
 COMFY_MODELS="${COMFYUI_MODELS_DIR:-/mapdata1/comfyui/ComfyUI/models}"
 SWARM_SRC="${SWARMUI_SRC:-/home/xszn/swarmui-src}"
+SWARMUI_VERSION="${SWARMUI_VERSION:-0.9.8.4}"
 
 mkdir -p "$ROOT/Data" "$ROOT/Output"
 
@@ -37,5 +38,24 @@ for node in SwarmComfyCommon SwarmComfyExtra ; do
   rm -rf "$dst/$node"
   cp -r "$src" "$dst/$node"
 done
+
+# SwarmUI redirects /Text2Image to the first-run installer while IsInstalled is
+# false, which would otherwise re-download ComfyUI and models on every fresh
+# volume. A backend registered by hand does not flip this flag on its own.
+SETTINGS="$ROOT/Settings.fds"
+if [ -f "$SETTINGS" ]; then
+  if ! grep -q '^IsInstalled: true' "$SETTINGS" || grep -q '^LaunchMode: install' "$SETTINGS"; then
+    cp -a "$SETTINGS" "$SETTINGS.bak-$(date +%Y%m%d-%H%M%S)"
+    sed -i -E \
+      -e 's/^IsInstalled:.*/IsInstalled: true/' \
+      -e "s/^InstallDate:.*/InstallDate: $(date +%F)/" \
+      -e "s/^InstallVersion:.*/InstallVersion: $SWARMUI_VERSION/" \
+      -e 's/^LaunchMode:.*/LaunchMode: none/' \
+      "$SETTINGS"
+    echo "Marked SwarmUI as installed. Restart the deployment to apply."
+  fi
+else
+  echo "Settings.fds not found yet. Start SwarmUI once, then rerun this script."
+fi
 
 echo "SwarmUI host paths ready. Restart ComfyUI after installing new nodes."

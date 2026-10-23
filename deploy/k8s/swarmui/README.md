@@ -72,6 +72,25 @@ mkdir -p /mapdata1/swarmui/{Data,Output}
 kubectl apply -f deploy/k8s/swarmui/swarmui.yaml
 ```
 
+### Skip the first-run installer
+
+SwarmUI redirects `/Text2Image` to `/Install` until `IsInstalled: true` is set
+in `/mapdata1/swarmui/Settings.fds`. Registering a backend by hand does **not**
+set this flag, and submitting the wizard clones a second ComfyUI into
+`dlbackend/ComfyUI` (from GitHub, which is very slow here) and downloads the
+selected models.
+
+Once the pod has generated `Settings.fds`, mark the instance installed and
+restart:
+
+```bash
+sudo bash deploy/k8s/swarmui/provision-swarmui.sh
+kubectl -n swarmui rollout restart deploy/swarmui
+curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:30190/Text2Image  # 200
+```
+
+The script is idempotent and also resets `LaunchMode: install` to `none`.
+
 Register the backend once (setting key `Address` is case-sensitive):
 
 ```bash
