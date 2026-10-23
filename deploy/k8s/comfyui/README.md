@@ -200,6 +200,27 @@ Models are read from `/mapdata1/comfyui/ComfyUI/models/checkpoints`. A
 different architecture (Flux, Z-Image, SD 1.5) needs its own node graph, not
 just a new checkpoint name, so add a matching API workflow to `workflows/`.
 
+LoRA and VAE weights are separate files. Pass them to the generator:
+
+```powershell
+python deploy/k8s/comfyui/workflows/make_workflow.py `
+  --checkpoint sd_xl_base_1.0.safetensors `
+  --lora sd_xl_offset_example-lora_1.0.safetensors --lora-strength 0.5 `
+  --vae sdxl_vae.safetensors --out "$env:TEMP\job.json"
+```
+
+Upload weights with `scp` into `models/checkpoints`, `models/loras`, or
+`models/vae`; those directories are writable by the `xszn` SSH user. Verify
+large transfers with `sha256sum` on the node. Replacing a file in place keeps
+the same name, so the workflow does not change, but ComfyUI may still hold the
+old weights in memory. Drop them before the next run:
+
+```powershell
+curl.exe -X POST http://172.16.0.168:30191/free `
+  -H "Content-Type: application/json" `
+  -d '{\"unload_models\":true,\"free_memory\":true}'
+```
+
 ## Storage
 
 `/mapdata1/comfyui` is mounted at `/workspace`. AI-Dock stores generated
