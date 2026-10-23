@@ -11,8 +11,8 @@ metadata:
   labels:
     app: ds4
 spec:
-  # One replica is intentional: the 4 TP ranks run inside this single pod.
-  replicas: 1
+  # Scaled to 0 to free GPUs 4-7. When enabled, all 4 TP ranks run in this single pod.
+  replicas: 0
   strategy:
     type: Recreate
   selector:
