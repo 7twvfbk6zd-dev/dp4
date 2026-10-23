@@ -104,6 +104,10 @@ spec:
           value: main
         - name: COMFYUI_REF
           value: v0.42.1
+        - name: COMFYUI_ARGS
+          value: --listen 0.0.0.0
+        - name: PIP_INDEX_URL
+          value: https://mirrors.cloud.tencent.com/pypi/simple
         - name: CF_QUICK_TUNNELS
           value: |-
             false
@@ -169,3 +173,16 @@ spec:
     port: 8188
     targetPort: http
     nodePort: 30188
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: comfyui-direct
+  namespace: comfyui
+spec:
+  selector:
+    app: comfyui
+  ports:
+  - name: http
+    port: 8188
+    targetPort: 18188
