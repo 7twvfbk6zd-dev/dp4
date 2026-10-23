@@ -149,6 +149,36 @@ workflows are in `workflows/`. See `workflows/README.md` for upload, submit,
 batch generation, dialogue layout, polling, and tuning instructions. The
 phased plan and current status are tracked in `ROADMAP.md`.
 
+## MCP for Codex
+
+The `comfyui-api` Service exposes ComfyUI on NodePort `30191` and bypasses the
+Caddy login, so a local MCP client can call the API without a token. Keep this
+port on the LAN: it is unauthenticated.
+
+Install the official MCP server and its CLI on the machine running Codex:
+
+```powershell
+uv tool install comfy-mcp
+uv tool install "comfy-cli>=1.14.0"
+```
+
+Register it in `~/.codex/config.toml`:
+
+```toml
+[mcp_servers.comfyui]
+type = "stdio"
+command = "C:/Users/Administrator/.local/bin/comfy-mcp.exe"
+
+[mcp_servers.comfyui.env]
+COMFYUI_URL = "http://172.16.0.168:30191"
+COMFY_BIN = "C:/Users/Administrator/.local/bin/comfy.exe"
+```
+
+Restart Codex, then run `workflows/sdxl-text2image.api.json` with
+`run_workflow`. `generate_image` and `run_template` depend on comfy-cli's
+template gallery, which times out from this network; a local API-format
+workflow submitted with `run_workflow` avoids the gallery entirely.
+
 ## Storage
 
 `/mapdata1/comfyui` is mounted at `/workspace`. AI-Dock stores generated
@@ -158,8 +188,8 @@ Keep large checkpoints on this volume, not on the 204 GiB root filesystem.
 ## Security
 
 The UI is exposed on the LAN without TLS. Use the generated password, and do
-not expose `30188` to the public internet. For remote access, prefer an SSH
-tunnel:
+not expose `30188` or the unauthenticated `30191` API port to the public
+internet. For remote access, prefer an SSH tunnel:
 
 ```bash
 kubectl -n comfyui port-forward svc/comfyui 8188:8188

@@ -16,6 +16,7 @@ normal ComfyUI output directory.
 | `build_motion_comic.py` | Adds camera motion, subtitles, and audio | `motion-comic.mp4` |
 | `generate_video.py` | Uploads a start frame and runs Wan2.2 image-to-video | `*.mp4` |
 | `finalize_comic.py` | Adds sound design, loudness normalization, and final encode | `*-final.mp4` |
+| `sdxl-text2image.api.json` | Minimal SDXL text-to-image prompt used by the Codex MCP | `codex_mcp` |
 
 ## Prerequisites
 
