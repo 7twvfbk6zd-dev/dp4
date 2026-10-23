@@ -179,6 +179,27 @@ Restart Codex, then run `workflows/sdxl-text2image.api.json` with
 template gallery, which times out from this network; a local API-format
 workflow submitted with `run_workflow` avoids the gallery entirely.
 
+`run_workflow` has no model parameter: the checkpoint is the
+`CheckpointLoaderSimple.ckpt_name` field inside the JSON. To switch within the
+SDXL family, generate a workflow for the target file:
+
+```powershell
+python deploy/k8s/comfyui/workflows/make_workflow.py `
+  --checkpoint other_model.safetensors --prompt "your prompt" `
+  --out "$env:TEMP\job.json"
+```
+
+Then call `run_workflow` with `%TEMP%\job.json`. List the exact names ComfyUI
+sees with:
+
+```powershell
+curl.exe -s http://172.16.0.168:30191/object_info/CheckpointLoaderSimple
+```
+
+Models are read from `/mapdata1/comfyui/ComfyUI/models/checkpoints`. A
+different architecture (Flux, Z-Image, SD 1.5) needs its own node graph, not
+just a new checkpoint name, so add a matching API workflow to `workflows/`.
+
 ## Storage
 
 `/mapdata1/comfyui` is mounted at `/workspace`. AI-Dock stores generated
